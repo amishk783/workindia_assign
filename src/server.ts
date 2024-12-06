@@ -6,6 +6,7 @@ import config from "./config";
 import { errorHandler } from "./middleware/errorMiddleware";
 import { sequelize } from "./db";
 import { authRouter } from "./routes/auth";
+import { trainRouter } from "./routes/train";
 
 const app = express();
 
@@ -21,6 +22,7 @@ if (config.nodeEnv !== "test") {
 }
 
 app.use("/", authRouter);
+app.use("/", trainRouter);
 
 app.use(errorHandler as express.ErrorRequestHandler);
 

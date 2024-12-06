@@ -19,7 +19,8 @@ export const verifyUser = (
 
   jwt.verify(
     token,
-    config.jwtSecret,
+    config.accessTokenSecret,
+
     (
       error: jwt.VerifyErrors | null,
       decoded: jwt.JwtPayload | string | undefined
@@ -45,6 +46,7 @@ export const verifyUser = (
 export const verifyRole = (allowedRoles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const user = req.user;
+    console.log("🚀 ~ return ~ user:", user)
 
     if (!user || !allowedRoles.includes(user.role)) {
       Logger.error(`Forbidden: Insufficient permissions for ${user?.role}`);

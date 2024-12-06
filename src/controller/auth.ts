@@ -7,7 +7,6 @@ import { AppError } from "@/utils/AppError";
 import { loginSchema, registerSchema } from "@/utils/validationSchema";
 import config from "@/config";
 
-
 export const signupController = async (
   req: Request,
   res: Response,
@@ -30,6 +29,7 @@ export const signupController = async (
       email: validatedData.email,
       password: hashPassword,
       username: validatedData.username,
+      role: validatedData.role,
     });
     const accessToken = jwt.sign(
       { userId: newUser.id, role: newUser.role },
@@ -43,6 +43,7 @@ export const signupController = async (
     const user = {
       email: newUser.email,
       accessToken,
+      role: newUser.role,
     };
 
     Logger.silly("User created Successfully");

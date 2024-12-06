@@ -28,8 +28,8 @@ const Booking = sequelize.define<BookingInstace>("Bookings", {
     primaryKey: true,
   },
 
-  user_id: { type: DataTypes.STRING, allowNull: false },
-  seat_no: { type: DataTypes.Number, allowNull: false },
+  user_id: { type: DataTypes.INTEGER, allowNull: false },
+  seat_no: { type: DataTypes.INTEGER, allowNull: false },
   train_id: { type: DataTypes.STRING, allowNull: false },
 });
 

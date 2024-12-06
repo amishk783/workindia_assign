@@ -11,7 +11,7 @@ export const errorHandler = (err: any, req: Request, res: Response) => {
   }
 
   // For unknown errors (programmer errors)
-  console.error(err); // Log the error for debugging purposes
+  console.error(err.statusCode); // Log the error for debugging purposes
 
   res.status(500).json({
     status: 'error',

@@ -2,6 +2,7 @@ import { sequelize } from "@/db";
 import Booking from "@/db/schema/Booking";
 import Train from "@/db/schema/Train";
 import User from "@/db/schema/User";
+import { AuthenticatedRequest } from "@/types";
 import { AppError } from "@/utils/AppError";
 import Logger from "@/utils/logger";
 import { trainCreateSchema } from "@/utils/validationSchema";
@@ -45,6 +46,8 @@ export const getAllTrains = async (
 ) => {
   try {
     const { source, destination } = req.query;
+    console.log("🚀 ~ destination:", destination);
+    console.log("🚀 ~ source:", source);
 
     if (!source) {
       Logger.error("Source station Id not found");
@@ -61,33 +64,48 @@ export const getAllTrains = async (
       },
     });
 
+    if (trains.length === 0) {
+      Logger.error("Train not found");
+      throw new AppError("Train not found", 400);
+    }
+
     res.status(200).send({ message: "Trains found successfully", trains });
   } catch (error) {
-    next(error);
+    console.log("🚀 ~ error:", error);
+    // next(error);
   }
 };
 
 export const bookSeatController = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
-  const { trainId } = req.params;
+  const { id: trainId } = req.params;
 
   if (!trainId) {
     Logger.error("Train Id not found");
     throw new AppError("Train Id not found", 400);
   }
-  const { userId } = req.body;
+  const { userId } = req.user;
+  console.log("🚀 ~ userId:", userId);
+
+  console.log("🚀 ~ user:", userId);
 
   const transaction = await sequelize.transaction();
 
   try {
-    const train = await Train.findByPk(trainId, { transaction, lock: true });
+    const train = await Train.findByPk(trainId, {
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
 
-    if (!train || train.available_seats <= 0) {
+    if (!train) throw new AppError("Train not found", 400);
+
+    if (train.available_seats <= 0) {
       throw new AppError("No seats available", 400);
     }
+  
     const seatNo = train.total_seats - train.available_seats;
 
     await Booking.create(
@@ -100,7 +118,10 @@ export const bookSeatController = async (
     );
 
     train.available_seats -= 1;
+    console.log(train.available_seats);
     await train.save({ transaction });
+
+    await transaction.commit();
 
     Logger.silly("Seat booked successfully");
     res.status(200).json({ message: "Seat booked successfully", seatNo });

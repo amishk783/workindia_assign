@@ -8,7 +8,7 @@ interface UserAttributes {
   username: string;
   email: string;
   password: string;
-  role?: "admin" | "user";
+  role: "admin" | "user";
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
