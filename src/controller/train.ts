@@ -1,7 +1,7 @@
 import { sequelize } from "@/db";
 import Booking from "@/db/schema/Booking";
 import Train from "@/db/schema/Train";
-import User from "@/db/schema/User";
+
 import { AuthenticatedRequest } from "@/types";
 import { AppError } from "@/utils/AppError";
 import Logger from "@/utils/logger";
@@ -89,11 +89,12 @@ export const bookSeatController = async (
     Logger.error("Train Id not found");
     throw new AppError("Train Id not found", 400);
   }
-  const { userId } = req.user;
-  console.log("🚀 ~ userId:", userId);
+  const user = req.user;
 
-  console.log("🚀 ~ user:", userId);
-
+  if (!user) {
+    Logger.error("User not found");
+    throw new AppError("User not found", 400);
+  }
   const transaction = await sequelize.transaction();
 
   try {
@@ -112,7 +113,7 @@ export const bookSeatController = async (
 
     await Booking.create(
       {
-        user_id: userId,
+        user_id: user.userId,
         train_id: trainId,
         seat_no: seatNo,
       },
