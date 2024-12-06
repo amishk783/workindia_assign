@@ -82,6 +82,7 @@ All API requests must include a valid JSON Web Token (JWT) in the Authorization 
     "updatedAt": "2024-12-01T00:00:00Z"
   }
 ]
+````
 2. **Book a Seat**
 **Description**: Book a seat on a specific train.
 
@@ -101,7 +102,7 @@ All API requests must include a valid JSON Web Token (JWT) in the Authorization 
   "seatNo": 50
 }]
 
-
+```
 3. **Booking Details**
 **Description**: Retrieve details of a specific booking.
 
