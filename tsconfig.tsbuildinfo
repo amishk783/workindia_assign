@@ -1,0 +1,1 @@
+{"root":["./src/server.ts","./src/config/index.ts","./src/controller/auth.ts","./src/db/index.ts","./src/db/schema/User.ts","./src/middleware/errorMiddleware.ts","./src/middleware/verifyUser.ts","./src/routes/auth.ts","./src/types/index.ts","./src/utils/AppError.ts","./src/utils/logger.ts","./src/utils/validationSchema.ts"],"errors":true,"version":"5.7.2"}
