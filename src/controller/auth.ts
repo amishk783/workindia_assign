@@ -1,11 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import Logger from "@/utils/logger";
 import User from "@/db/schema/User";
 import { AppError } from "@/utils/AppError";
 import { loginSchema, registerSchema } from "@/utils/validationSchema";
 import config from "@/config";
+import ApiKey from "@/db/schema/ApiKey";
 
 export const signupController = async (
   req: Request,
@@ -31,6 +32,7 @@ export const signupController = async (
       username: validatedData.username,
       role: validatedData.role,
     });
+
     const accessToken = jwt.sign(
       { userId: newUser.id, role: newUser.role },
       config.accessTokenSecret,
@@ -39,11 +41,23 @@ export const signupController = async (
     );
 
     await newUser.save();
+    let apiKey;
+    if (newUser.role === "admin") {
+      const keySalt = await bcrypt.genSalt(10);
+
+      apiKey = await ApiKey.create({
+        user_id: newUser.id,
+        key: keySalt,
+      });
+
+      await apiKey.save();
+    }
 
     const user = {
       email: newUser.email,
       accessToken,
       role: newUser.role,
+      ...(apiKey ? { apiKey: apiKey.key } : {}),
     };
 
     Logger.silly("User created Successfully");
@@ -65,14 +79,14 @@ export const loginController = async (
 
     if (!user) {
       Logger.error("User does not exits");
-      throw new AppError("User does not exits", 403);
+      throw new AppError("User does not exits", 400);
     }
     const isPasswordValid = await bcrypt.compare(
       validatedData.password,
       user.password
     );
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid Password" });
+      throw new AppError("Invalid Password", 400);
     }
 
     const accessToken = jwt.sign(

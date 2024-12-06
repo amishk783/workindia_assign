@@ -13,13 +13,15 @@ export const createTrainController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const exisitngTrain = await Train.findOne({ where: { trainName: "" } });
-
   try {
     const validatedData = trainCreateSchema.parse(req.body);
+
+    const exisitngTrain = await Train.findOne({
+      where: { trainName: validatedData.trainName },
+    });
     if (exisitngTrain) {
       Logger.error("Train Alreaddy exits");
-      throw new AppError("User already exits", 403);
+      throw new AppError("Train Alreaddy exits", 403);
     }
 
     const newTrain = await Train.create({
@@ -105,7 +107,7 @@ export const bookSeatController = async (
     if (train.available_seats <= 0) {
       throw new AppError("No seats available", 400);
     }
-  
+
     const seatNo = train.total_seats - train.available_seats;
 
     await Booking.create(
